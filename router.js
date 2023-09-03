@@ -3,6 +3,7 @@ const login = require('./components/login/handler')
 const logout = require('./components/logout/handler')
 const exercise = require('./components/exercise/handler')
 const institution = require('./components/institution/handler')
+const profile = require('./components/profile/handler')
 
 module.exports = (app) => {
   app.use('/register', register())
@@ -10,4 +11,5 @@ module.exports = (app) => {
   app.use('/logout', logout())
   app.use('/exercise', exercise())
   app.use('/institution', institution())
+  app.use('/profile', profile())
 }
