@@ -15,5 +15,5 @@ module.exports = (app) => {
   app.use('/institution', institution())
   app.use('/profile', profile())
   app.use('/profesor', profesor())
-  app.use('/coordinador', coordinador())
+  app.use('/coordinacion', coordinador())
 }

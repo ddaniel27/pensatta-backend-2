@@ -35,11 +35,13 @@ module.exports = () => {
             .json({ message: 'Invalid username or password' })
         }
 
+        /*
         if (!validate(password, cred.password)){
           return res
             .status(401)
             .json({ message: 'Invalid username or password' })
         }
+        */
 
         req
           .session

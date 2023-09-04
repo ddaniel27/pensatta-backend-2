@@ -12,20 +12,16 @@ module.exports = () => {
         .status(200)
         .json({
           msg: 'all grades metrics retrieved',
-          metrics: Object.values(exercises.metrics).map(metric => ({
-            apropiacionValues: metric.apr,
-            spiderValues: metric.spider,
-            nivel: metric.nivel,
-            curso: metric.curso,
-            idCurso: metric.idCurso
-          })),
-          name: exercises.name,
+          metricsByGroup: exercises.metrics,
+          coordinator: exercises.name,
           institution: exercises.institution,
           average: {
             apropiacionValues: exercises.apropiacionValues,
             spiderValues: exercises.spiderValues,
             averageAll: exercises.averageAll
-          }
+          },
+          metricsAverage: exercises.met2,
+          metrics: exercises.met,
         })
     })
 
@@ -55,12 +51,12 @@ module.exports = () => {
     .post(async (req, res) => {
       const { id } = req.params
       const { id_Profesor, nivel, curso } = req.body
-      const courses = await db.addGrupos(id, id_Profesor, nivel, curso)
+      await db.addGrupos(id, id_Profesor, nivel, curso)
       res
         .status(200)
         .json({
           msg: 'all grades Profesores retrieved',
-          profesores: courses
+          added: true
         })
     })
 
@@ -75,7 +71,7 @@ module.exports = () => {
         password
       } = req.body
 
-      const courses = await db.addStudent(id, {
+      await db.addStudent(id, {
         first_name,
         last_name,
         num_lista,
@@ -86,7 +82,7 @@ module.exports = () => {
         .status(200)
         .json({
           msg: 'all grades Profesores retrieved',
-          estudiantes: courses
+          added: true
         })
     })
 

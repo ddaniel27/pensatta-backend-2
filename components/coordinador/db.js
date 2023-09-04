@@ -337,11 +337,24 @@ module.exports = {
     const [spider, apr] = calculateMetrics(res[0].rows)
     const gradeSpiderAndAprObject = calculateMetricsByCourseAndLevel(res[2].rows)
 
+    const metrics = Object.values(gradeSpiderAndAprObject).map(metric => ({
+            apropiacionValues: metric.apr,
+            spiderValues: metric.spider,
+            nivel: metric.nivel,
+            curso: metric.curso,
+            idCurso: metric.idCurso
+          }))
+
+    const met = calcularPromediosPorNivel(metrics)
+    const met2 = calcularPromedioApropiacionYSpiderValues(met)
+
     return {
       averageAll,
       spiderValues: spider,
       apropiacionValues: apr,
-      metrics: gradeSpiderAndAprObject,
+      metrics,
+      met,
+      met2,
       name: `${res[3].rows[0].first_name} ${res[3].rows[0].last_name}`,
       institution: res[3].rows[0].nombre
     }
@@ -566,4 +579,113 @@ function calculateMetricsByStudentID(data) {
   }
 
   return resultMap;
+}
+
+function calcularPromediosPorNivel(data) {
+  const promediosPorNivel = {};
+
+  data.forEach((item) => {
+    const nivel = item.nivel;
+
+    if (!promediosPorNivel[nivel]) {
+      promediosPorNivel[nivel] = {
+        apropiacionValues: {},
+        spiderValues: {},
+        count: 0,
+      };
+    }
+
+    for (const key in item.apropiacionValues) {
+      if (item.apropiacionValues.hasOwnProperty(key)) {
+        promediosPorNivel[nivel].apropiacionValues[key] =
+          (promediosPorNivel[nivel].apropiacionValues[key] || 0) +
+          item.apropiacionValues[key];
+      }
+    }
+
+    for (const key in item.spiderValues) {
+      if (item.spiderValues.hasOwnProperty(key)) {
+        promediosPorNivel[nivel].spiderValues[key] =
+          (promediosPorNivel[nivel].spiderValues[key] || 0) +
+          item.spiderValues[key];
+      }
+    }
+
+    promediosPorNivel[nivel].count++;
+  });
+
+  for (const nivel in promediosPorNivel) {
+    if (promediosPorNivel.hasOwnProperty(nivel)) {
+      for (const key in promediosPorNivel[nivel].apropiacionValues) {
+        if (promediosPorNivel[nivel].apropiacionValues.hasOwnProperty(key)) {
+          promediosPorNivel[nivel].apropiacionValues[key] =
+            (promediosPorNivel[nivel].apropiacionValues[key] /
+              promediosPorNivel[nivel].count).toFixed(2);
+        }
+      }
+      for (const key in promediosPorNivel[nivel].spiderValues) {
+        if (promediosPorNivel[nivel].spiderValues.hasOwnProperty(key)) {
+          promediosPorNivel[nivel].spiderValues[key] =
+            (promediosPorNivel[nivel].spiderValues[key] /
+              promediosPorNivel[nivel].count).toFixed(2);
+        }
+      }
+    }
+  }
+
+  const promediosArray = Object.entries(promediosPorNivel).map(([nivel, values]) => {
+    return {
+      nivel: parseInt(nivel),
+      apropiacionValues: values.apropiacionValues,
+      spiderValues: values.spiderValues,
+    };
+  });
+
+  return promediosArray;
+}
+
+function calcularPromedioApropiacionYSpiderValues(data) {
+  const totalApropiacionValues = {};
+  const totalSpiderValues = {};
+  let count = 0;
+
+  // Recorre cada elemento en el array de entrada
+  data.forEach((item) => {
+    // Asegúrate de que los valores sean numéricos
+    for (const key in item.apropiacionValues) {
+      if (item.apropiacionValues.hasOwnProperty(key)) {
+        totalApropiacionValues[key] =
+          (totalApropiacionValues[key] || 0) + parseFloat(item.apropiacionValues[key]);
+      }
+    }
+
+    for (const key in item.spiderValues) {
+      if (item.spiderValues.hasOwnProperty(key)) {
+        totalSpiderValues[key] =
+          (totalSpiderValues[key] || 0) + parseFloat(item.spiderValues[key]);
+      }
+    }
+
+    count++;
+  });
+
+  // Calcula el promedio dividiendo por el contador
+  for (const key in totalApropiacionValues) {
+    if (totalApropiacionValues.hasOwnProperty(key)) {
+      totalApropiacionValues[key] =
+        (totalApropiacionValues[key] / count).toFixed(2);
+    }
+  }
+
+  for (const key in totalSpiderValues) {
+    if (totalSpiderValues.hasOwnProperty(key)) {
+      totalSpiderValues[key] =
+        (totalSpiderValues[key] / count).toFixed(2);
+    }
+  }
+
+  return {
+    apropiacionValues: totalApropiacionValues,
+    spiderValues: totalSpiderValues,
+  };
 }

@@ -4,7 +4,7 @@ module.exports = () => {
   const router = express.Router()
 
   router.route('/')
-    .delete((req, res) => {
+    .post((req, res) => {
       try {
         req.session.user = null
         req.session.destroy()

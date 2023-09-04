@@ -25,7 +25,8 @@ module.exports = () => {
         const metrics = await db.getMetrics(id)
         res.status(200).json({
           msg: 'Metrics retrieved',
-          metrics
+          spiderValues: metrics[0],
+          apropiacionValues: metrics[1],
         })
       } catch (e) {
         res.status(400).send(e.message)
