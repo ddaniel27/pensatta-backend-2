@@ -48,6 +48,8 @@ module.exports = () => {
             password: undefined
           }
 
+        await db.updateLastLogin(cred.id)
+
         res
           .status(200)
           .json({

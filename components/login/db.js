@@ -15,5 +15,12 @@ module.exports = {
       ...res.rows[0],
       password: { encrypt, iterations, salt, hash }
     }
+  },
+  updateLastLogin: async (userID) => {
+    const query = `UPDATE pensatta_user SET last_login = $1 WHERE id = $2`
+    const values = [new Date(Date.now()), userID]
+
+    const res = await connection.query(query, values)
+    return res.rows[0]
   }
 }

@@ -19,7 +19,7 @@ module.exports = {
   },
   getResumen: async (userID) => {
     const queryAverage = `SELECT "averageScore", "averageTime" FROM pensatta_calificacion WHERE usuario_id = $1`
-    const queryHistorial = `SELECT id FROM pensatta_historial WHERE user_id = $1`
+    const queryHistorial = `SELECT COUNT(id) FROM pensatta_historial WHERE user_id = $1`
     const queryProfile = `SELECT A.last_login, B.nombre FROM pensatta_user A INNER JOIN pensatta_institucion B ON A.institucion_id = B.id WHERE A.id = $1`
     const values = [userID]
 
@@ -30,7 +30,7 @@ module.exports = {
     ])
 
     const {averageScore, averageTime} = res[0].rows[0]
-    const historial = res[1].rows.length
+    const historial = res[1].rows[0].count
     const {last_login, nombre} = res[2].rows[0]
 
     return {
