@@ -128,6 +128,11 @@ module.exports = () => {
         .status(200)
         .json({
           msg: 'all grades metrics retrieved',
+          average: {
+            apropiacionValues: exercises.apropiacionValues,
+            spiderValues: exercises.spiderValues,
+            averageAll: exercises.averageAll
+          },
           infoUsuario: Object.values(exercises.gradeMetrics).map(metric => {
             const scoresObj = {}
             const aprObj = {}

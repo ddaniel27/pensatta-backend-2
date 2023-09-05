@@ -14,6 +14,8 @@ module.exports = {
     await connection.query(updatePassword, values)
   },
   getGrado: async (id, grado) => {
+    const queryAverageSpider = `SELECT A.score, B.dimension FROM pensatta_historial A INNER JOIN pensatta_ejercicio B ON A.exercise_id = B.id`
+    const queryAverageAll = `SELECT "averageScore" FROM pensatta_calificacion`
     const getMetricsByGradeID = `
     SELECT
         C.username,
@@ -50,12 +52,19 @@ module.exports = {
 
     const res = await Promise.all([
       connection.query(getMetricsByGradeID, values),
+      connection.query(queryAverageSpider),
+      connection.query(queryAverageAll),
     ])
 
     const gradeSpiderAndAprObject = calculateMetricsByStudentID(res[0].rows)
+    const averageAll = res[2].rows.length > 0 ? averageOfList(res[2].rows) : 0
+    const [spider, apr] = calculateMetrics(res[1].rows)
 
     return {
       gradeMetrics: gradeSpiderAndAprObject,
+      averageAll,
+      spiderValues: spider,
+      apropiacionValues: apr,
     }
   },
   getMetrics: async (id, nivel) => {
