@@ -645,7 +645,11 @@ function calcularPromediosPorNivel(data) {
   const promediosArray = Object.entries(promediosPorNivel).map(([nivel, values]) => {
     return {
       nivel: parseInt(nivel),
-      apropiacionValues: values.apropiacionValues,
+      apropiacionValues: Object.fromEntries(
+        Object.entries(values.apropiacionValues).map(
+          ([key, value]) => [key, parseFloat(value)]
+        )
+      ),
       spiderValues: values.spiderValues,
     };
   });
