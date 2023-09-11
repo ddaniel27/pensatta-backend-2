@@ -86,6 +86,20 @@ module.exports = () => {
         })
     })
 
+  router.route('/grupos/deletestudent/:id')
+    .put(async (req, res) => {
+      const { id } = req.params
+      const { id_Estudiante, id_Grado } = req.body
+
+      await db.deleteStudent(id, id_Estudiante, id_Grado)
+      res
+        .status(200)
+        .json({
+          msg: 'all grades Profesores retrieved',
+          added: true
+        })
+    })
+
   router.route('/grupos/reasignteacher/:id')
     .put(async (req, res) => {
       const { id } = req.params

@@ -3,6 +3,23 @@ const c = require('pbkdf2')
 const crypto = require('crypto')
 
 module.exports = {
+  deleteStudent: async (id, id_Estudiante, id_Grado) => {
+    const deleteFromPensattaGradoEstudiantes = `
+    DELETE FROM pensatta_grado_estudiantes WHERE grado_id = $1 AND student_id = $2;
+    `
+    const deleteFromPensattaUser = `
+    DELETE FROM pensatta_user WHERE id = $1;
+    `
+    const values = [id_Grado, id_Estudiante]
+
+    await Promise.all([
+      connection.query(deleteFromPensattaGradoEstudiantes, values),
+    ])
+
+    await Promise.all([
+      connection.query(deleteFromPensattaUser, [id_Estudiante]),
+    ])
+  },
   changePassword: async (id, id_Estudiante, password) => {
     const updatePassword = `
     UPDATE pensatta_user
@@ -172,14 +189,14 @@ module.exports = {
 
     const query1 = `
     INSERT INTO pensatta_user (username, password, institucion_id, first_name, last_name, "numLista", role, is_superuser, is_staff, is_active, email, date_joined)
-    SELECT $2, $3, institucion_id, $4, $5, $6, $7, $8, $9, $10, $11, $12 FROM pensatta_grado WHERE id = $1 RETURNING id;
+    SELECT $2, $3, institucion_id, $4, $5, $6, $7, $8, $9, $10, $11, $12 FROM pensatta_grado WHERE id = $1 LIMIT 1 RETURNING id;
     `
     const query2 = `
     INSERT INTO pensatta_grado_estudiantes (grado_id, student_id)
     VALUES ($1, $2);
     `
     const values = [
-      id,
+      id_Grado,
       username,
       createPassword(password),
       first_name,
@@ -196,6 +213,7 @@ module.exports = {
     const res = await Promise.all([
       connection.query(query1, values),
     ])
+
     const res2 = await Promise.all([
       connection.query(query2, [id_Grado, res[0].rows[0].id]),
     ])
@@ -244,40 +262,44 @@ module.exports = {
       connection.query(teachersQuery, values),
     ])
 
-    const teachers = res[0].rows
+    const teachers = res[0].rows.map(teacher => ({
+      id: teacher.teacher_id,
+      first_name: teacher.first_name,
+      last_name: teacher.last_name,
+    }))
 
     return teachers
   },
   getResumen: async (id) => {
     const studentsByProfesorID = `
     SELECT
-        C.id AS student_id,
-        C.username,
-        C.first_name,
-        C.last_name,
-        A.nivel,
-        A.curso,
-        A.id,
-        PC.id as profesor_id,
-        PC.first_name as profesor_first_name,
-        PC.last_name as profesor_last_name
+    C.id AS student_id,
+      C.username,
+      C.first_name,
+      C.last_name,
+      A.nivel,
+      A.curso,
+      A.id AS grado_id,
+      PC.id AS profesor_id,
+      PC.first_name AS profesor_first_name,
+      PC.last_name AS profesor_last_name
     FROM
-        pensatta_user C
-    INNER JOIN
-        pensatta_grado_estudiantes B
+    pensatta_grado A
+    LEFT JOIN
+    pensatta_grado_estudiantes B
     ON
-        C.id = B.student_id
-    INNER JOIN
-        pensatta_grado A
+    A.id = B.grado_id
+    LEFT JOIN
+    pensatta_user C
     ON
-        B.grado_id = A.id
-    INNER JOIN
-        pensatta_user PC
+    B.student_id = C.id
+    LEFT JOIN
+    pensatta_user PC
     ON
-        A.profesor_id = PC.id
+    A.profesor_id = PC.id
     WHERE
-        A.institucion_id = (SELECT institucion_id FROM pensatta_user WHERE id = $1);
-    `
+    A.institucion_id = (SELECT institucion_id FROM pensatta_user WHERE id = $1);
+  `
     const values = [id]
 
     const res = await Promise.all([
@@ -285,6 +307,7 @@ module.exports = {
     ])
 
     const students = res[0].rows
+    console.log(students)
 
     return groupStudentsByLevelAndCourse(students)
   },
@@ -418,7 +441,7 @@ function groupStudentsByLevelAndCourse(studentsArray) {
       result[key] = {
         level: student.nivel,
         course: student.curso,
-        course_id: student.id,
+        course_id: student.grado_id,
         teacher_name: `${student.profesor_first_name} ${student.profesor_last_name}`,
         teacher_id: student.profesor_id,
         students: [],
