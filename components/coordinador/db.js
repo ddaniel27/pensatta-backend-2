@@ -238,24 +238,19 @@ module.exports = {
   getTeachers: async (id) => {
     const teachersQuery = `
     SELECT
-      C.id AS teacher_id,
-      C.first_name,
-      C.last_name
+      P.id AS teacher_id,
+      P.first_name,
+      P.last_name
     FROM
+      pensatta_user P
+    JOIN
       pensatta_user C
-    INNER JOIN
-      pensatta_grado A
     ON
-      C.id = A.profesor_id
-    INNER JOIN
-      pensatta_user PC
-    ON
-      PC.institucion_id = A.institucion_id
+      P.institucion_id = C.institucion_id
     WHERE
-      PC.id = $1
-    GROUP BY
-      C.id;
+      C.id = $1 AND P.role = 'TEACHER';
     `
+
     const values = [id]
 
     const res = await Promise.all([
