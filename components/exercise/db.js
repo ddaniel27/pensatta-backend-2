@@ -15,18 +15,22 @@ module.exports = {
       connection.query(queryHistorial, [user_id])
     ])
 
-    const { averageScore, averageTime } = qar.rows[0]
-    const historialCount = qhr.rows[0].count
+    if (qar.rows.length === 0) {
+      await connection.query(`INSERT INTO pensatta_calificacion (usuario_id, "averageScore", "averageTime") VALUES ($1, $2, $3)`, [user_id, score, time])
+    } else {
+      const { averageScore, averageTime } = qar.rows[0]
+      const historialCount = qhr.rows[0].count
 
-    const newAverageScore = newAverage(averageScore, historialCount, score)
-    const newAverageTime = newAverage(averageTime, historialCount, time)
+      const newAverageScore = newAverage(averageScore, historialCount, score)
+      const newAverageTime = newAverage(averageTime, historialCount, time)
 
-    await connection.query(queryUpdate, [newAverageScore, newAverageTime, user_id])
+      await connection.query(queryUpdate, [newAverageScore, newAverageTime, user_id])
+    }
 
     return res.rows[0]
   }
 }
 
 function newAverage(lastAverage, lastCount, newValue) {
-  return (lastAverage * (lastCount - 1) + newValue ) / lastCount
+  return Math.round((lastAverage * (lastCount - 1) + newValue ) / lastCount)
 }

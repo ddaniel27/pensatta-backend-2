@@ -15,7 +15,7 @@ module.exports = () => {
       
       try {
         const result = await db.insertNewExercise({
-          score,
+          score: parseFloat(score),
           time,
           exercise,
           user_id: id

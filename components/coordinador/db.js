@@ -302,7 +302,6 @@ module.exports = {
     ])
 
     const students = res[0].rows
-    console.log(students)
 
     return groupStudentsByLevelAndCourse(students)
   },
