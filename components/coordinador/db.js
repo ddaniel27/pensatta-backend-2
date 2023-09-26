@@ -7,6 +7,14 @@ module.exports = {
     const deleteFromPensattaGradoEstudiantes = `
     DELETE FROM pensatta_grado_estudiantes WHERE grado_id = $1 AND student_id = $2;
     `
+    const deleteFromPensattaCalificacion = `
+    DELETE FROM pensatta_calificacion WHERE usuario_id = $1;
+    `
+
+    const deleteFromPensattaHistorial = `
+    DELETE FROM pensatta_historial WHERE user_id = $1;
+    `
+
     const deleteFromPensattaUser = `
     DELETE FROM pensatta_user WHERE id = $1;
     `
@@ -14,6 +22,8 @@ module.exports = {
 
     await Promise.all([
       connection.query(deleteFromPensattaGradoEstudiantes, values),
+      connection.query(deleteFromPensattaCalificacion, [id_Estudiante]),
+      connection.query(deleteFromPensattaHistorial, [id_Estudiante]),
     ])
 
     await Promise.all([
