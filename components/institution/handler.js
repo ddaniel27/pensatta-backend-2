@@ -20,7 +20,8 @@ module.exports = () => {
         country,
         province,
         city,
-        institution_code
+        institution_code,
+        language = 'es'
       } = req.body
 
       try {
@@ -30,7 +31,8 @@ module.exports = () => {
           pais: country,
           provincia: province,
           ciudad: city,
-          codigo: institution_code
+          codigo: institution_code,
+          idioma: language
         })
         res.status(200).json(result)
       }

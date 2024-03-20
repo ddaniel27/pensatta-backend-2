@@ -2,7 +2,7 @@ const connection = require('../connection')
 
 module.exports = {
   getCredentialsByUsername: async (user) => {
-    const query = `SELECT * FROM pensatta_user WHERE username = $1`
+const query = ` SELECT u.*, COALESCE(l.value, 'es') AS language FROM pensatta_user u LEFT JOIN pensatta_languages l ON u.institucion_id = l.institucion_id WHERE u.username = $1`
     const values = [user]
     const res = await connection.query(query, values)
 
