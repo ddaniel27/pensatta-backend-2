@@ -29,8 +29,8 @@ module.exports = {
       connection.query(queryProfile, values)
     ])
 
-    const {averageScore, averageTime} = res[0].rows[0]
-    const historial = res[1].rows[0].count
+    const {averageScore, averageTime} = res[0].rows[0] || {averageScore: 0, averageTime: 0}
+    const historial = res[1].rows[0].count || 1
     const {last_login, nombre} = res[2].rows[0]
 
     return {
